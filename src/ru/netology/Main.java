@@ -28,8 +28,15 @@ class Main {
     final static String STR_TAX_SYSTEM_TWO_RU = "УСН доходы минус расходы";
     final static char WHITESPACE_CHAR = '\u00A0';
 
+    final static int TAX_RATE_EARNINGS_MINUS_SPENDING = 15;
+    final static int TAX_RATE_EARNINGS_ONLY = 6;
+
     static int earnings = 0; // доходы
     static int spending = 0; // расходы
+
+    static int taxEarningsMinusSpending = 0;
+    static int taxEarningsOnly = 0;
+
     static int saving = 0; // экономия
     static int bestTaxValue = 0; // налог по самой выгодной системе
     static int otherTaxValue = 0; // налог по другой системе
@@ -39,12 +46,9 @@ class Main {
     public static void main(String[] args) {
 
         Scanner scanner = new Scanner(System.in);
-        System.out.println(STR_PROGRAM_GREETINGS_MESSAGE);
+        showGreetings();
         while (true) {
-            System.out.println(STR_SELECT_OPERATION_MESSAGE);
-            System.out.println("1. " + STR_EARNING_OPERATION);
-            System.out.println("2. " + STR_SPENDING_OPERATION);
-            System.out.println("3. " + STR_TAX_TIP_OPERATION);
+            showMenu();
             String input = scanner.nextLine();
             if (STR_PROGRAM_END.equals(input)) {
                 break;
@@ -58,16 +62,44 @@ class Main {
                     setSpending(scanner);
                     break;
                 case 3:
-                    setBestTaxSystem();
-                    setSaving();
+                    computeResult();
                     showResult();
                     break;
                 default:
-                    System.out.println(STR_NO_OPERATION_MESSAGE);
+                    showMenuException();
                     break;
             }
         }
+        programEnd();
+    }
+
+    public static void programEnd() {
+        System.out.println();
         System.out.println(STR_PROGRAM_END_MESSAGE);
+    }
+
+    public static void showMenuException() {
+        System.out.println(STR_NO_OPERATION_MESSAGE);
+    }
+
+    public static void showGreetings() {
+        System.out.println();
+        System.out.println(STR_PROGRAM_GREETINGS_MESSAGE);
+        System.out.println();
+    }
+
+    public static void showMenu() {
+        System.out.println(STR_SELECT_OPERATION_MESSAGE);
+        System.out.println("1." + WHITESPACE_CHAR + STR_EARNING_OPERATION);
+        System.out.println("2." + WHITESPACE_CHAR + STR_SPENDING_OPERATION);
+        System.out.println("3." + WHITESPACE_CHAR + STR_TAX_TIP_OPERATION);
+    }
+
+    public static void computeResult() {
+        taxEarningsMinusSpending();
+        taxEarningsOnly();
+        setBestTaxSystem();
+        setSaving();
     }
 
     public static void showResult() {
@@ -75,6 +107,7 @@ class Main {
         System.out.println(STR_TAX_RESULT_RESULT + WHITESPACE_CHAR + getBestTaxValue() + WHITESPACE_CHAR + STR_PAYMENT_SYSTEM);
         System.out.println(STR_TAX_OTHER_SYSTEM_RESULT + WHITESPACE_CHAR + getOtherTaxValue() + WHITESPACE_CHAR + STR_PAYMENT_SYSTEM);
         System.out.println(STR_SAVINGS_RESULT + WHITESPACE_CHAR + getSaving() + WHITESPACE_CHAR + STR_PAYMENT_SYSTEM);
+        System.out.println();
     }
 
     public static void setEarnings(Scanner scanner) {
@@ -89,26 +122,27 @@ class Main {
         setSpending(input);
     }
 
-    public static int taxEarningsMinusSpending() {
-        int tax = (getEarnings() - getSpending()) * 15 / 100;
-        return Math.max(tax, 0);
+    public static void taxEarningsMinusSpending() {
+        int tax = (getEarnings() - getSpending()) * TAX_RATE_EARNINGS_MINUS_SPENDING / 100;
+        setTaxEarningsMinusSpending(Math.max(tax, 0));
     }
 
-    public static int taxEarningsOnly() {
-        return getEarnings() * 6 / 100;
+    public static void taxEarningsOnly() {
+        int tax = getEarnings() * TAX_RATE_EARNINGS_ONLY / 100;
+        setTaxEarningsOnly(Math.max(tax, 0));
     }
 
     public static void setBestTaxSystem() {
-        final int taxEarningsMinusSpending = taxEarningsMinusSpending();
-        final int taxEarningsOnly = taxEarningsOnly();
+        final int taxEarningsMinusSpending = getTaxEarningsMinusSpending();
+        final int taxEarningsOnly = getTaxEarningsOnly();
         setBestTaxSystem(taxEarningsOnly < taxEarningsMinusSpending ? STR_TAX_SYSTEM_ONE_RU : STR_TAX_SYSTEM_TWO_RU);
         setBestTaxValue(Math.min(taxEarningsOnly, taxEarningsMinusSpending));
         setOtherTaxValue(Math.max(taxEarningsOnly, taxEarningsMinusSpending));
     }
 
     public static void setSaving() {
-        final int taxEarningsMinusSpending = taxEarningsMinusSpending();
-        final int taxEarningsOnly = taxEarningsOnly();
+        final int taxEarningsMinusSpending = getTaxEarningsMinusSpending();
+        final int taxEarningsOnly = getTaxEarningsOnly();
         setSaving(Math.abs(taxEarningsOnly - taxEarningsMinusSpending));
     }
 
@@ -120,12 +154,28 @@ class Main {
         return spending;
     }
 
-    public static void setEarnings(int earning) {
+    public static void setEarnings(final int earning) {
         earnings += earning;
     }
 
-    public static void setSpending(int spe) {
+    public static void setSpending(final int spe) {
         spending += spe;
+    }
+
+    public static int getTaxEarningsOnly() {
+        return taxEarningsOnly;
+    }
+
+    public static void setTaxEarningsOnly(final int tax) {
+        taxEarningsOnly = tax;
+    }
+
+    public static int getTaxEarningsMinusSpending() {
+        return taxEarningsMinusSpending;
+    }
+
+    public static void setTaxEarningsMinusSpending(final int tax) {
+        taxEarningsMinusSpending = tax;
     }
 
     public static int getSaving() {
