@@ -4,39 +4,45 @@ import java.util.*;
 
 class Main {
 
-    final static String STR_PROGRAM_END = "end";
-
-    final static String STR_PROGRAM_END_MESSAGE = "Программа завершена!";
-    final static String STR_PROGRAM_GREETINGS_MESSAGE = "Здравствуйте!";
+    final static String STR_PROGRAM_GREETINGS_MESSAGE = "Здравствуйте.";
+    final static String STR_PROGRAM_GREETINGS_MORNING_MESSAGE = "Доброе утро!";
+    final static String STR_PROGRAM_GREETINGS_DAY_MESSAGE = "Добрый день!";
+    final static String STR_PROGRAM_GREETINGS_EVENING_MESSAGE = "Добрый вечер!";
+    final static String STR_PROGRAM_GREETINGS_NIGHT_MESSAGE = "Спать уже давно пора!:)";
     final static String STR_SELECT_OPERATION_MESSAGE = "Выберите операцию и введите её номер:";
     final static String STR_NO_OPERATION_MESSAGE = "Такой операции нет!";
+    final static String STR_NUMBER_FORMAT_EXCEPTION_MESSAGE = "Введите цифры!";
+    final static String STR_PROGRAM_END_HELP_MESSAGE = "Чтобы выйти, введите end, находясь в меню";
     final static String STR_ENTER_EARNINGS_MESSAGE = "Введите сумму дохода:";
     final static String STR_ENTER_SPENDING_MESSAGE = "Введите сумму расхода:";
-
-    final static String STR_EARNING_OPERATION = "Добавить новый доход";
-    final static String STR_SPENDING_OPERATION = "Добавить новый расход";
-    final static String STR_TAX_TIP_OPERATION = "Выбрать систему налогооблажения";
-
-    final static String STR_PAYMENT_SYSTEM = "рублей";
-
-    final static String STR_SAVINGS_RESULT = "Экономия";
-    final static String STR_TAX_OTHER_SYSTEM_RESULT = "Налог на другой системе:";
-    final static String STR_TAX_SYSTEM_TIP_RESULT = "Мы советуем Вам выбрать:";
-    final static String STR_TAX_RESULT_RESULT = "Ваш налог составит:";
-
+    final static String STR_EARNING_OPERATION_MENU = "1. Добавить новый доход";
+    final static String STR_SPENDING_OPERATION_MENU = "2. Добавить новый расход";
+    final static String STR_TAX_TIP_OPERATION_MENU = "3. Выбрать систему налогооблажения";
     final static String STR_TAX_SYSTEM_ONE_RU = "УСН доходы";
     final static String STR_TAX_SYSTEM_TWO_RU = "УСН доходы минус расходы";
+    final static String STR_PROGRAM_END = "end";
+    final static String STR_PROGRAM_END_MESSAGE = "Программа завершена";
     final static char WHITESPACE_CHAR = '\u00A0';
+    static String resultMessage =
+            "Мы советуем вам %s\n" +
+            "Ваш налог составит: %d рублей\n" +
+            "Налог на другой системе: %d рублей\n" +
+            "Экономия: %d рублей\n";
+
+    public static int getTime() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("GMT+3"));
+        return calendar.get(Calendar.HOUR_OF_DAY);
+    }
+
+    final static int rightNow = getTime();
 
     final static int TAX_RATE_EARNINGS_MINUS_SPENDING = 15;
     final static int TAX_RATE_EARNINGS_ONLY = 6;
-
     static int earnings = 0; // доходы
     static int spending = 0; // расходы
-
-    static int taxEarningsMinusSpending = 0;
-    static int taxEarningsOnly = 0;
-
+    static int taxEarningsMinusSpending = 0; // налог УСН доходы минус расходы
+    static int taxEarningsOnly = 0; // налог УСН доходы
     static int saving = 0; // экономия
     static int bestTaxValue = 0; // налог по самой выгодной системе
     static int otherTaxValue = 0; // налог по другой системе
@@ -53,7 +59,7 @@ class Main {
             if (STR_PROGRAM_END.equals(input)) {
                 break;
             }
-            int operation = Integer.parseInt(input);
+            int operation = checkingMenuSelection(input);
             switch (operation) {
                 case 1:
                     setEarnings(scanner);
@@ -64,6 +70,8 @@ class Main {
                 case 3:
                     computeResult();
                     showResult();
+                    break;
+                case 0:
                     break;
                 default:
                     showMenuException();
@@ -82,17 +90,28 @@ class Main {
         System.out.println(STR_NO_OPERATION_MESSAGE);
     }
 
+    public static int checkingMenuSelection(String input) throws NumberFormatException{
+        int operation = 0;
+        try {
+            operation = Integer.parseInt(input);
+            return operation;
+        } catch (NumberFormatException e) {
+            System.out.println(STR_NUMBER_FORMAT_EXCEPTION_MESSAGE);
+        }
+        return operation;
+    }
+
     public static void showGreetings() {
-        System.out.println();
-        System.out.println(STR_PROGRAM_GREETINGS_MESSAGE);
+        System.out.println(BANNER_STARTER);
+        System.out.println(generatedGreetingMessage());
         System.out.println();
     }
 
     public static void showMenu() {
         System.out.println(STR_SELECT_OPERATION_MESSAGE);
-        System.out.println("1." + WHITESPACE_CHAR + STR_EARNING_OPERATION);
-        System.out.println("2." + WHITESPACE_CHAR + STR_SPENDING_OPERATION);
-        System.out.println("3." + WHITESPACE_CHAR + STR_TAX_TIP_OPERATION);
+        System.out.println(STR_EARNING_OPERATION_MENU);
+        System.out.println(STR_SPENDING_OPERATION_MENU);
+        System.out.println(STR_TAX_TIP_OPERATION_MENU);
     }
 
     public static void computeResult() {
@@ -103,23 +122,45 @@ class Main {
     }
 
     public static void showResult() {
-        System.out.println(STR_TAX_SYSTEM_TIP_RESULT + WHITESPACE_CHAR + getBestTaxSystem());
-        System.out.println(STR_TAX_RESULT_RESULT + WHITESPACE_CHAR + getBestTaxValue() + WHITESPACE_CHAR + STR_PAYMENT_SYSTEM);
-        System.out.println(STR_TAX_OTHER_SYSTEM_RESULT + WHITESPACE_CHAR + getOtherTaxValue() + WHITESPACE_CHAR + STR_PAYMENT_SYSTEM);
-        System.out.println(STR_SAVINGS_RESULT + WHITESPACE_CHAR + getSaving() + WHITESPACE_CHAR + STR_PAYMENT_SYSTEM);
+        System.out.println(String
+                .format(resultMessage,
+                        getBestTaxSystem(),
+                        getBestTaxValue(),
+                        getOtherTaxValue(),
+                        getSaving()
+                ));
         System.out.println();
     }
 
-    public static void setEarnings(Scanner scanner) {
+    public static void setEarnings(Scanner scanner)  throws NumberFormatException {
         System.out.println(STR_ENTER_EARNINGS_MESSAGE);
-        final int input = Integer.parseInt((scanner.nextLine()));
-        setEarnings(input);
+        String input = scanner.nextLine();
+        try {
+            final int parseInput = Integer.parseInt(input);
+            setEarnings(parseInput);
+        } catch (NumberFormatException e) {
+            if (input.equals(STR_PROGRAM_END)) {
+                System.out.println(STR_PROGRAM_END_HELP_MESSAGE);
+            } else {
+                System.out.println(STR_NUMBER_FORMAT_EXCEPTION_MESSAGE);
+            }
+        }
     }
 
-    public static void setSpending(Scanner scanner) {
+    public static void setSpending(Scanner scanner) throws NumberFormatException {
         System.out.println(STR_ENTER_SPENDING_MESSAGE);
-        final int input = Integer.parseInt((scanner.nextLine()));
-        setSpending(input);
+        String input = scanner.nextLine();
+        try {
+            final int parseInput = Integer.parseInt(input);
+            setSpending(parseInput);
+        } catch (NumberFormatException e) {
+            if (input.equals(STR_PROGRAM_END)) {
+                System.out.println(STR_PROGRAM_END_HELP_MESSAGE);
+            } else {
+                System.out.println(STR_NUMBER_FORMAT_EXCEPTION_MESSAGE);
+            }
+        }
+
     }
 
     public static void taxEarningsMinusSpending() {
@@ -144,6 +185,18 @@ class Main {
         final int taxEarningsMinusSpending = getTaxEarningsMinusSpending();
         final int taxEarningsOnly = getTaxEarningsOnly();
         setSaving(Math.abs(taxEarningsOnly - taxEarningsMinusSpending));
+    }
+
+    public static String generatedGreetingMessage() {
+        if (rightNow >= 4 && rightNow <= 11) {
+            return STR_PROGRAM_GREETINGS_MORNING_MESSAGE;
+        } else if (rightNow >= 12 && rightNow <= 18) {
+            return STR_PROGRAM_GREETINGS_DAY_MESSAGE;
+        } else if (rightNow >= 19 && rightNow <= 24) {
+            return STR_PROGRAM_GREETINGS_EVENING_MESSAGE;
+        } else {
+            return STR_PROGRAM_GREETINGS_MESSAGE + WHITESPACE_CHAR + STR_PROGRAM_GREETINGS_NIGHT_MESSAGE;
+        }
     }
 
     public static int getEarnings() {
@@ -209,4 +262,9 @@ class Main {
     public static void setBestTaxSystem(final String system) {
         bestTaxSystem = system;
     }
+
+    final static String BANNER_STARTER =
+    " ╦╔╦╗╔═╗╔╦╗╔═╗        ╦╔═╗╦  ╦╔═╗       ╦  ╦  ╦\n" +
+    " ║ ║║╠═╝ ║║║    ───   ║╠═╣╚╗╔╝╠═╣  ───  ║  ║  ║\n" +
+    "╚╝═╩╝╩  ═╩╝╚═╝       ╚╝╩ ╩ ╚╝ ╩ ╩       ╩  ╩  ╩";
 }
