@@ -1,5 +1,7 @@
 package ru.netology.Model;
 
+import java.util.Objects;
+
 public class Author {
 
     private String firstName;
@@ -18,5 +20,7 @@ public class Author {
         return lastName;
     }
 
-
+    public boolean equals(Author author) {
+       return firstName.equals(author.getFirstName()) && lastName.equals(author.getLastName());
+    }
 }
