@@ -1,6 +1,7 @@
 package ru.netology.Model;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Book {
 
@@ -20,6 +21,22 @@ public class Book {
         this.authors.add(author);
     }
 
+    public String getIsbn() {
+        return isbn;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public ArrayList<Author> getAuthors() {
+        return authors;
+    }
+
+    public int getPagesCount() {
+        return pagesCount;
+    }
+
     private String authorsToString() {
         StringBuffer bf = new StringBuffer();
         int count = 0;
@@ -37,11 +54,22 @@ public class Book {
         return bf.toString();
     }
 
+    public boolean equals(Book book) {
+
+        return isbn.equals(book.getIsbn()) &&
+                title.equals(book.getTitle()) &&
+                pagesCount == book.getPagesCount() &&
+                authors.equals(book.getAuthors());
+    }
+
     public String toString() {
+        final String AUTHOR = "Автор: ";
+        final String AUTHORS = "Авторы: ";
+        String str = authors.size() > 1 ? AUTHORS : AUTHOR;
 
         return "ISBN : " + isbn + '\n' +
-                "Title: " + title + '\n' +
-                "Authors: " + authorsToString() + '\n' +
-                "Number of Pages: " + pagesCount + '\n';
+                "Название: " + title + '\n' +
+                str + authorsToString() + '\n' +
+                "Количество страниц: " + pagesCount + '\n';
     }
 }
