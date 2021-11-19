@@ -22,9 +22,9 @@ public class TryToColorService {
 
     private final static String BANNER_STARTER =
             "\n" +
-                    " ╦╔╦╗╔═╗╔╦╗╔═╗        ╦╔═╗╦  ╦╔═╗       ╦ ╦ ╦  ╔╦╗┌─┐┬─┐┬┌─┌─┐┌┬┐\n" +
-                    " ║ ║║╠═╝ ║║║    ───   ║╠═╣╚╗╔╝╠═╣  ───  ║ ║ ║  ║║║├─┤├┬┘├┴┐├┤  │ \n" +
-                    "╚╝═╩╝╩  ═╩╝╚═╝       ╚╝╩ ╩ ╚╝ ╩ ╩       ╩ ╩ ╩  ╩ ╩┴ ┴┴└─┴ ┴└─┘ ┴ \n";
+                    " ╦╔╦╗╔═╗╔╦╗╔═╗        ╦╔═╗╦  ╦╔═╗       ╦ ╦ ╦ \n" +
+                    " ║ ║║╠═╝ ║║║    ───   ║╠═╣╚╗╔╝╠═╣  ───  ║ ║ ║ \n" +
+                    "╚╝═╩╝╩  ═╩╝╚═╝       ╚╝╩ ╩ ╚╝ ╩ ╩       ╩ ╩ ╩ \n";
 
     public static String getBannerStarter(Color color) {
         return color.get() + BANNER_STARTER + Color.ANSI_RESET.get();
