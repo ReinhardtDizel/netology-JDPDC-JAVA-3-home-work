@@ -1,171 +1,95 @@
-# Домашнее задание к занятию "Массивы многомерные"
-
-## Задача 2. Дописываем крестики-нолики
+## Задача 1. Игра-шутер
 
 ### Описание
+Один из проектов — это игра-шутер (~~Half-Life 3, только никому ни слова~~).
+У игрока должна быть возможность использовать разные виды оружия, в будущем в игру могут быть добавлены новые.
+Необходимо спроектировать иерархию классов, а также систему слотов для оружия у игрока.
 
-Возьмём за основу игру крестики-нолики с вебинара и допишем метод проверки победы одного из игроков, переписав его на
-циклы. Так он будет работать при любом значении `SIZE`.
+### Функционал программы
+1. Создание объекта Player у которого будет набор оружия;
+2. Возможность у игрока вызвать метод выстрела, внутри которого будут проверки на допустимость номера оружия для выстрела;
+3. Классы оружия должны быть в пакете `weapon` (вспомните какие ДВЕ вещи нужно сделать, чтобы поместить классы в пакеты; мы их проходили на втором занятии);
+4. Возможность выбора оружия для выстрела в main.
 
-### Образ результата
+### Процесс реализации
 
-Победитель определяется методом `whoIsWin(char[][] field)`. Этот метод обрабатывает две переменные типа `boolean`,
-которые объявляются в этом методе и инициализируются значением, полученным из
-метода `isWin(char[][] field, char player, int count)`. Метод `isWin` обрабатывает результаты трех
-методов, которые проверяют истинность условий:
-Правда ли, что в двумерном массиве символов, один символ(`char player`) расположен в ряд по `SIZE` раз
+1. Создадим класс игрока и функцию main.
 
-1) На одной из строк массива.
-
-2) На одной из колонок массива.
-
-3) на одной из диагональных прямых массива.
-
-Для проверки работоспособности метода `hoIsWin` были определены 6 случаев расстановки символов.
-
-### Пример вывода при запуске main
-
-```
-ДЕМОНСТРАЦИЯ
-
-O O O - -
-X X X X X
-X O X O X
-O O - O X
-O - O X X
-ПОБЕДИЛИ КРЕСТИКИ
-
-X O - - -
-- X O - -
-X - X O -
-O O - X -
-O - - X X
-ПОБЕДИЛИ КРЕСТИКИ
-
-O O O O O
-X X X - -
-X - X X X
-O - - - X
-O - - - -
-ПОБЕДИЛИ НОЛИКИ
-
-X O X O X
-O X O X O
-- - X - -
-- - - - -
-- - - - -
-НИКТО НЕ ПОБЕДИЛ
-
-- - X - -
-- X X - 0
-- - X - 0
-- 0 X 0 -
-- 0 X - -
-ПОБЕДИЛИ КРЕСТИКИ
-
-0 0 - - X
-- 0 0 X -
-X - X 0 -
-0 X - 0 -
-X - - X 0
-ПОБЕДИЛИ КРЕСТИКИ
-```
-
-### Код игры в крестики-нолики
-
-```java
-public class GameDemo {
-
-    public static String whoIsWin(char[][] field, int count) {
-
-        boolean winCross = isWin(field, CROSS, count);
-        boolean winZero = isWin(field, ZERO, count);
-
-        if (winCross) {
-            return "Крестики";
-        } else if (winZero) {
-            return "Нолики";
-        } else {
-            return "Никто";
-        }
+* Класс Player содержит список оружия и метод "_выстрелить_"
+```java 
+class Player {
+    // Указываем тип данных Weapon, который будет храниться в "слотах игрока" 
+    private Weapon[] weaponSlots;
+    
+    public Player() {
+        // Снаряжаем нашего игрока
+        weaponSlots = new Weapon[] {
+            // TODO заполнить слоты оружием
+            // new BigGun(),
+            // new WaterPistol()
+        };
     }
-
-    public static boolean isWin(char[][] field, char player, int count) {
-
-        return isWinHorizontal(field, player, count) || isWinVertical(field, player, count) || isWinDiagonals(field, player, count);
+    
+    public int getSlotsCount() {
+        // length - позволяет узнать, сколько всего слотов с оружием у игрока
+        return weaponSlots.length;
     }
-
-    public static boolean isWinHorizontal(char[][] field, char player, int count) {
-
-        for (char[] chars : field) {
-
-            boolean win;
-            for (int j = 0; j < field.length || count > 0; j++) {
-
-                win = chars[j] == player;
-                if (win) {
-                    --count;
-                } else {
-                    break;
-                }
-            }
-            if (count == 0) {
-                return true;
-            }
-
-        }
-        return false;
-    }
-
-    public static boolean isWinVertical(char[][] field, char player, int count) {
-
-        for (int i = 0; i < field.length; i++) {
-
-            boolean win;
-            for (int j = 0; j < field.length || count > 0; j++) {
-
-                win = field[j][i] == player;
-                if (win) {
-                    --count;
-                } else {
-                    break;
-                }
-            }
-            if (count == 0) {
-                return true;
-            }
-
-        }
-        return false;
-    }
-
-    public static boolean isWinDiagonals(char[][] field, char player, int count) {
-
-        boolean win;
-        for (int i = 0; i < field.length || count > 0; i++) {
-
-            win = field[i][i] == player;
-            if (win) {
-                --count;
-            } else {
-                break;
-            }
-        }
-        if (count == 0) {
-            return true;
-        }
-
-        count = SIZE;
-        for (int i = 0; i < field.length || count > 0; i++) {
-
-            win = field[field.length - i - 1][i] == player;
-            if (win) {
-                --count;
-            } else {
-                break;
-            }
-        }
-        return count == 0;
+    
+    public void shotWithWeapon(int slot) {
+        // TODO проверить на выход за границы
+        // если значение slot некорректно, то
+        // выйти из метода написав об этом в консоль
+        
+        // Получаем оружие из выбранного слота
+        Weapon weapon = weaponSlots[slot];
+        // Огонь!
+        weapon.shot();
     }
 }
-``` 
+```
+
+* Метод `main`
+```java
+public static void main(String[] args) {
+    Scanner scanner = new Scanner(System.in);
+        Player player = new Player();
+        // Как настоящие программисты мы имеем в виду, что исчисление начинается с 0
+        System.out.format("У игрока %d слотов с оружием,"
+            + " введите номер, чтобы выстрелить,"
+            + " -1 чтобы выйти%n", 
+            player.getSlotsCount()
+        );
+        int slot;
+        
+        // TODO главный цикл игры: 
+        // запрашивать номер с клавиатуры 
+        // с помощью scanner.nextInt(),
+        // пока не будет введено -1
+        
+        System.out.println("Game over!");
+}
+```
+
+2. Создадим классы для некоторых видов оружия.
+* Базовый класс для всех видов оружия
+```java
+class Weapon {
+    public void shot() {
+        // TODO override me!
+    }
+}
+```
+
+> Как "заставить" дочерний класс переопределить поведение некоторых методов базового класса, мы узнаем на следующей лекции.
+
+* Создадим дочерние классы:
+    * Пистолет;
+    * Автомат;
+    * РПГ;
+    * Рогатка;
+    * Водный пистолет.
+
+* В каждом из дочерних классов переопределите метод `shot()`, чтобы он изменил поведение оружия в соответствии с его типом. Например, чтобы оно выводило в консоль соответствующие выстрелу звуки: `Пив-Пав!`.
+
+3. Теперь можно вернуться к классу `Player` и создать по экземпляру каждого оружия.
+4. Не забудьте разграничить классы по типу с помощью пакетов, например, все классы с оружием можно вынести в package `weapon`.
