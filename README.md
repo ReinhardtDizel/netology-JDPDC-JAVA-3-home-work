@@ -1,15 +1,30 @@
 # Домашнее задание к занятию "Массивы многомерные"
+
 ## Задача 2. Дописываем крестики-нолики
 
 ### Описание
-Возьмём за основу игру крестики-нолики с вебинара и допишем метод проверки победы одного из игроков, переписав его на циклы. Так он будет работать при любом значении `SIZE`.
+
+Возьмём за основу игру крестики-нолики с вебинара и допишем метод проверки победы одного из игроков, переписав его на
+циклы. Так он будет работать при любом значении `SIZE`.
 
 ### Образ результата
-1. Вы дописываете метод `isWin` так, что он работает для любого значения `SIZE`
-2. На проверку отправляете реплит, в котором есть статическое поле `SIZE` со значением 5 (остальные статические поля оставляете как есть), метод `isWin` и метод `main`, в котором вы демонстрируете работу этого метода на разных видах полей; остальные методы и код можно удалить.
-3. Общаться с пользователем (спрашивать у него что-то) не нужно
+
+Победитель определяется методом `whoIsWin(char[][] field)`. Этот метод обрабатывает две переменные типа `boolean`,
+которые объявляются в этом методе и инициализируются значением, полученным из
+метода `isWin(char[][] field, char player, int count)`. Метод `isWin` обрабатывает результаты трех
+методов, которые проверяют истинность условий:
+Правда ли, что в двумерном массиве символов, один символ(`char player`) расположен в ряд по `SIZE` раз
+
+1) На одной из строк массива.
+
+2) На одной из колонок массива.
+
+3) на одной из диагональных прямых массива.
+
+Для проверки работоспособности метода `hoIsWin` были определены 6 случаев расстановки символов.
 
 ### Пример вывода при запуске main
+
 ```
 ДЕМОНСТРАЦИЯ
 
@@ -40,106 +55,117 @@ O X O X O
 - - - - -
 - - - - -
 НИКТО НЕ ПОБЕДИЛ
+
+- - X - -
+- X X - 0
+- - X - 0
+- 0 X 0 -
+- 0 X - -
+ПОБЕДИЛИ КРЕСТИКИ
+
+0 0 - - X
+- 0 0 X -
+X - X 0 -
+0 X - 0 -
+X - - X 0
+ПОБЕДИЛИ КРЕСТИКИ
 ```
 
 ### Код игры в крестики-нолики
+
 ```java
-import java.util.Scanner;
+public class GameDemo {
 
-public class Main {
-    public static final int SIZE = 3;
-    public static final char EMPTY = '-';
-    public static final char CROSS = 'X';
-    public static final char ZERO = 'O';
+    public static String whoIsWin(char[][] field, int count) {
 
-    public static void main(String[] args) {
-        char[][] field = new char[SIZE][SIZE];
-        for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++) {
-                field[i][j] = EMPTY;
-            }
+        boolean winCross = isWin(field, CROSS, count);
+        boolean winZero = isWin(field, ZERO, count);
+
+        if (winCross) {
+            return "Крестики";
+        } else if (winZero) {
+            return "Нолики";
+        } else {
+            return "Никто";
         }
-
-        Scanner scanner = new Scanner(System.in);
-
-        boolean isCrossTurn = true;
-
-        while (true) {
-            printField(field);
-            System.out.println("Ходят " + (isCrossTurn ? "крестики" : "нолики") + "!");
-            String input = scanner.nextLine(); // "2 3"
-            String[] parts = input.split(" "); // ["2" , "3"]
-            int r = Integer.parseInt(parts[0]) - 1; // 2-1 = 1
-            int c = Integer.parseInt(parts[1]) - 1; // 3-1 = 2
-
-            if (field[r][c] != EMPTY) {
-                System.out.println("Сюда ходить нельзя");
-                continue;
-            }
-
-            field[r][c] = isCrossTurn ? CROSS : ZERO;
-            if (isWin(field, isCrossTurn ? CROSS : ZERO)) {
-                printField(field);
-                System.out.println("Победили " + (isCrossTurn ? "крестики" : "нолики"));
-                break;
-            } else {
-                if (isCrossTurn) {
-                    isCrossTurn = false;
-                } else {
-                    isCrossTurn = true;
-                }
-                //isCrossTurn = !isCrossTurn;
-            }
-        }
-
-        System.out.println("Игра закончена!");
     }
 
-    // !!ВНИМАНИЕ!!
-    // Работает только для 3x3
-    // Этот метод вам и надо переписать
-    public static boolean isWin(char[][] field, char player) {
-        if (field[0][0] == player && field[0][1] == player && field[0][2] == player)
-            return true;
-        if (field[1][0] == player && field[1][1] == player && field[1][2] == player)
-            return true;
-        if (field[2][0] == player && field[2][1] == player && field[2][2] == player)
-            return true;
+    public static boolean isWin(char[][] field, char player, int count) {
 
-        if (field[0][0] == player && field[1][0] == player && field[2][0] == player)
-            return true;
-        if (field[0][1] == player && field[1][1] == player && field[2][1] == player)
-            return true;
-        if (field[0][2] == player && field[1][2] == player && field[2][2] == player)
-            return true;
+        return isWinHorizontal(field, player, count) || isWinVertical(field, player, count) || isWinDiagonals(field, player, count);
+    }
 
-        if (field[0][0] == player && field[1][1] == player && field[2][2] == player)
-            return true;
-        if (field[2][0] == player && field[1][1] == player && field[0][2] == player)
-            return true;
+    public static boolean isWinHorizontal(char[][] field, char player, int count) {
 
+        for (char[] chars : field) {
+
+            boolean win;
+            for (int j = 0; j < field.length || count > 0; j++) {
+
+                win = chars[j] == player;
+                if (win) {
+                    --count;
+                } else {
+                    break;
+                }
+            }
+            if (count == 0) {
+                return true;
+            }
+
+        }
         return false;
     }
 
-    public static void printField(char[][] field) {
-        for (char[] row : field) {
-            for (char cell : row) {
-                System.out.print(cell + " ");
+    public static boolean isWinVertical(char[][] field, char player, int count) {
+
+        for (int i = 0; i < field.length; i++) {
+
+            boolean win;
+            for (int j = 0; j < field.length || count > 0; j++) {
+
+                win = field[j][i] == player;
+                if (win) {
+                    --count;
+                } else {
+                    break;
+                }
             }
-            System.out.println();
+            if (count == 0) {
+                return true;
+            }
+
         }
+        return false;
+    }
+
+    public static boolean isWinDiagonals(char[][] field, char player, int count) {
+
+        boolean win;
+        for (int i = 0; i < field.length || count > 0; i++) {
+
+            win = field[i][i] == player;
+            if (win) {
+                --count;
+            } else {
+                break;
+            }
+        }
+        if (count == 0) {
+            return true;
+        }
+
+        count = SIZE;
+        for (int i = 0; i < field.length || count > 0; i++) {
+
+            win = field[field.length - i - 1][i] == player;
+            if (win) {
+                --count;
+            } else {
+                break;
+            }
+        }
+        return count == 0;
     }
 }
 ``` 
-
-### Советы по реализации
-1. Для начала всмотритесь в этот метод и найдите повторяющиеся закономерности. Если вы плохо себе представляете какие ячейки тут проверяются, нарисуйте поле на листочке и посмотрите на клетки поля каждой строки кода на рисунке.
-2. Рассмотрим на примере проверки заполненности строк. Мы видим, что первые три условные оператора повторятся с точностью до первого индекса (номер строки), поэтому мы можем сделать цикл:
-```java
-for (int row = 0; row < SIZE; row++) { // обратите внимание, что мы поставили SIZE, а не 3, чтобы работало с любым значением
-    if (field[row][0] == player && field[row][1] == player && field[row][2] == player)
-        return true;
-}
-```
-3. Того что мы сделали недостаточно, тк если в строке будет больше трёх клеток, то наш `if` всё равно проверит лишь первые три. Для этого и условный оператор надо переписать на вложенный цикл. Идея его такова: заведём переменную для подсчёта количества `player` в строке, изначально она будет 0. Пробежимся по всем клеткам строки, для каждой клетки, если там `player`, увеличим эту переменную на 1. После цикла по клеткам строки, сравним эту переменную с `SIZE`. Если она не будет равна `SIZE`, значит не во всех клетках был `player`; если будет равна, значит `player` победил и возвращаем `true`.
-4. На проверку предоставляем только метод `isWin` с демонстрацией его работоспособности в `main`.
