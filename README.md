@@ -1,164 +1,76 @@
-## Задача 1. Игра-шутер
+## Задача 2. Задача от бухгалтеров
 
 ### Описание
-Один из проектов — это игра-шутер (~~Half-Life 3, только никому ни слова~~).
-У игрока должна быть возможность использовать разные виды оружия, в будущем в игру могут быть добавлены новые.
-Необходимо спроектировать иерархию классов, а также систему слотов для оружия у игрока.
+Следующая задача пришла от наших бухгалтеров.
+Бухгалтерская программа должна уметь проводить операции c различными агентами, как c физическими/юридическими лицами, так и с иностранными компаниями: чп, ип, ооо, зао, ~~иклмн~~, ~~ёпрст~~.
+С некоторых операций налог платить не нужно, некоторые облагаются подоходным налогом, с некоторых необходимо уплатить НДС.
+Необходимо расширить функциональность класса `Bill` возможностью работы с различными системами налогообложения.
 
 ### Функционал программы
-1. Создание объекта Player у которого будет набор оружия;
-2. Возможность у игрока вызвать метод выстрела, внутри которого будут проверки на допустимость номера оружия для выстрела;
-3. Классы оружия должны быть в пакете `weapon` (вспомните какие ДВЕ вещи нужно сделать, чтобы поместить классы в пакеты; мы их проходили на втором занятии);
-4. Возможность выбора оружия для выстрела в main.
+
+→ Создание нескольких счетов и расчет налогов для них.
 
 ### Процесс реализации
+1. Класс `Bill`
 
-1. Создадим класс игрока и функцию main.
+В системе уже есть класс `Bill`, в который мы добавили поле `TaxType taxType;` и метод `payTaxes()`:
 
-* Класс Player содержит список оружия и метод "_выстрелить_"
+```java
+class Bill {
+    private double amount;
+    private TaxType taxType;
+    private TaxService taxService;
+    
+    public Bill(double amount, TaxType taxType, TaxService taxService) {
+        this.amount = amount;
+        this.taxType = taxType;
+        this.taxService = taxService;
+    }
+    
+    public void payTaxes() {
+        // TODO вместо 0.0 посчитать размер налога исходя из TaxType
+        double taxAmount = 0.0;
+        
+        taxService.payOut(taxAmount);
+    }
+}
+```
+
+А также класс налоговой службы:
+```java
+class TaxService {
+    public void payOut(double taxAmount) {
+        System.out.format("Уплачен налог в размере %.2f%n", taxAmount);
+    }
+}
+```
+
+2. Создадим классы для различных типов налогообложения.
+* Базовый класс
 ```java 
-public class Player {
-
-    private Weapon[] weaponSlots;
-
-    public Player() {
-
-        weaponSlots = new Weapon[]{
-                new WaterPistol(),
-                new Pistol(),
-                new GrenadeLauncher(),
-                new Slingshot(),
-                new MachineGun()
-        };
-    }
-
-    public int getSlotsCount() {
-
-        return weaponSlots.length;
-    }
-
-    public void shotWithWeapon(int slot) {
-
-        String noWeaponSlot = "Такого оружия нет!";
-        if (slot < 0 || slot >= weaponSlots.length) {
-
-            System.out.println(noWeaponSlot);
-        } else {
-
-            Weapon weapon = weaponSlots[slot];
-            weapon.shot();
-        }
+class TaxType {
+    public double calculateTaxFor(double amount) {
+        // TODO override me!
+        return 0.0;
     }
 }
 ```
+* Классы, расширяющие `TaxType`:
+  * Подоходный налог, = 13% (`IncomeTaxType`)
+  * НДС, = 18% (`VATaxType`)
+  * Прогрессивный налог, до 100 тысяч = 10%, больше 100 тысяч = 15% (`ProgressiveTaxType`)
 
-* Метод `main`
+3. В методе `main` создадим несколько счетов и оплатим с них налоги в налоговую службу.
+
 ```java
-class Main {
-
-  public static void main(String[] args) {
-
-    Scanner scanner = new Scanner(System.in);
-    Player player = new Player();
-    int slot;
-
-    System.out.format("У игрока %d слотов с оружием,"
-                    + " введите номер, чтобы выстрелить,"
-                    + " -1 чтобы выйти%n",
-            player.getSlotsCount()
-    );
-
-    while (true) {
-
-      slot = scanner.nextInt();
-      if (slot == -1) {
-
-        break;
-      }
-      player.shotWithWeapon(slot);
+public static void main(String[] args) {
+    TaxService taxService = new TaxService();
+    Bill[] payments = new Bill[] {
+        // TODO создать платежи с различным типами налогообложения
+    };
+    for (int i = 0; i < payments.length; ++i) {
+        Bill bill = payments[i];
+        bill.payTaxes();
     }
-
-    System.out.println("Game over!");
-  }
-}
-```
-
-2. Создадим классы для некоторых видов оружия.
-* Базовый класс для всех видов оружия
-```java
-public class Weapon {
-
-  public void shot() {
-    System.out.println(getClass().getSimpleName() + " Стреляет");
-  }
-}
-```
-
-> Как "заставить" дочерний класс переопределить поведение некоторых методов базового класса, мы узнаем на следующей лекции.
-
-* Создадим дочерние классы:
-    * Water pistol;
-    * Pistol;
-    * Grenade launcher;
-    * Slingshot;
-    * Machine gun.
-
-* В каждом из дочерних классов переопределите метод `shot()`, чтобы он изменил поведение оружия в соответствии с его типом. Например, чтобы оно выводило в консоль соответствующие выстрелу звуки: `Пив-Пав!`.
-```java
-/**
- * Grenade launcher
- */
-public class GrenadeLauncher extends Weapon {
-
-  @Override
-  public void shot() {
-    super.shot();
-    System.out.println("БАБАХ-БУМ!!!");
-  }
-}
-/**
- * Machine gun
- */
-public class MachineGun extends Weapon {
-
-  @Override
-  public void shot() {
-    super.shot();
-    System.out.println("Тра-та-та-та-та!");
-  }
-}
-/**
- * Pistol
- */
-public class Pistol extends Weapon {
-
-  @Override
-  public void shot() {
-    super.shot();
-    System.out.println("Пуф!");
-  }
-}
-/**
- * Slingshot
- */
-public class Slingshot extends Weapon {
-
-  @Override
-  public void shot() {
-    super.shot();
-    System.out.println("Чпок!");
-  }
-}
-
-/**
- * Water pistol
- */
-public class WaterPistol extends Weapon {
-
-  @Override
-  public void shot() {
-    super.shot();
-    System.out.println("Пиу-пиу-пиу!");
-  }
 }
 ```
