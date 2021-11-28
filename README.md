@@ -17,79 +17,148 @@
 
 * Класс Player содержит список оружия и метод "_выстрелить_"
 ```java 
-class Player {
-    // Указываем тип данных Weapon, который будет храниться в "слотах игрока" 
+public class Player {
+
     private Weapon[] weaponSlots;
-    
+
     public Player() {
-        // Снаряжаем нашего игрока
-        weaponSlots = new Weapon[] {
-            // TODO заполнить слоты оружием
-            // new BigGun(),
-            // new WaterPistol()
+
+        weaponSlots = new Weapon[]{
+                new WaterPistol(),
+                new Pistol(),
+                new GrenadeLauncher(),
+                new Slingshot(),
+                new MachineGun()
         };
     }
-    
+
     public int getSlotsCount() {
-        // length - позволяет узнать, сколько всего слотов с оружием у игрока
+
         return weaponSlots.length;
     }
-    
+
     public void shotWithWeapon(int slot) {
-        // TODO проверить на выход за границы
-        // если значение slot некорректно, то
-        // выйти из метода написав об этом в консоль
-        
-        // Получаем оружие из выбранного слота
-        Weapon weapon = weaponSlots[slot];
-        // Огонь!
-        weapon.shot();
+
+        String noWeaponSlot = "Такого оружия нет!";
+        if (slot < 0 || slot >= weaponSlots.length) {
+
+            System.out.println(noWeaponSlot);
+        } else {
+
+            Weapon weapon = weaponSlots[slot];
+            weapon.shot();
+        }
     }
 }
 ```
 
 * Метод `main`
 ```java
-public static void main(String[] args) {
+class Main {
+
+  public static void main(String[] args) {
+
     Scanner scanner = new Scanner(System.in);
-        Player player = new Player();
-        // Как настоящие программисты мы имеем в виду, что исчисление начинается с 0
-        System.out.format("У игрока %d слотов с оружием,"
-            + " введите номер, чтобы выстрелить,"
-            + " -1 чтобы выйти%n", 
+    Player player = new Player();
+    int slot;
+
+    System.out.format("У игрока %d слотов с оружием,"
+                    + " введите номер, чтобы выстрелить,"
+                    + " -1 чтобы выйти%n",
             player.getSlotsCount()
-        );
-        int slot;
-        
-        // TODO главный цикл игры: 
-        // запрашивать номер с клавиатуры 
-        // с помощью scanner.nextInt(),
-        // пока не будет введено -1
-        
-        System.out.println("Game over!");
+    );
+
+    while (true) {
+
+      slot = scanner.nextInt();
+      if (slot == -1) {
+
+        break;
+      }
+      player.shotWithWeapon(slot);
+    }
+
+    System.out.println("Game over!");
+  }
 }
 ```
 
 2. Создадим классы для некоторых видов оружия.
 * Базовый класс для всех видов оружия
 ```java
-class Weapon {
-    public void shot() {
-        // TODO override me!
-    }
+public class Weapon {
+
+  public void shot() {
+    System.out.println(getClass().getSimpleName() + " Стреляет");
+  }
 }
 ```
 
 > Как "заставить" дочерний класс переопределить поведение некоторых методов базового класса, мы узнаем на следующей лекции.
 
 * Создадим дочерние классы:
-    * Пистолет;
-    * Автомат;
-    * РПГ;
-    * Рогатка;
-    * Водный пистолет.
+    * Water pistol;
+    * Pistol;
+    * Grenade launcher;
+    * Slingshot;
+    * Machine gun.
 
 * В каждом из дочерних классов переопределите метод `shot()`, чтобы он изменил поведение оружия в соответствии с его типом. Например, чтобы оно выводило в консоль соответствующие выстрелу звуки: `Пив-Пав!`.
+```java
+/**
+ * Grenade launcher
+ */
+public class GrenadeLauncher extends Weapon {
 
-3. Теперь можно вернуться к классу `Player` и создать по экземпляру каждого оружия.
-4. Не забудьте разграничить классы по типу с помощью пакетов, например, все классы с оружием можно вынести в package `weapon`.
+  @Override
+  public void shot() {
+    super.shot();
+    System.out.println("БАБАХ-БУМ!!!");
+  }
+}
+/**
+ * Machine gun
+ */
+public class MachineGun extends Weapon {
+
+  @Override
+  public void shot() {
+    super.shot();
+    System.out.println("Тра-та-та-та-та!");
+  }
+}
+/**
+ * Pistol
+ */
+public class Pistol extends Weapon {
+
+  @Override
+  public void shot() {
+    super.shot();
+    System.out.println("Пуф!");
+  }
+}
+/**
+ * Slingshot
+ */
+public class Slingshot extends Weapon {
+
+  @Override
+  public void shot() {
+    super.shot();
+    System.out.println("Чпок!");
+  }
+}
+
+/**
+ * Water pistol
+ */
+public class WaterPistol extends Weapon {
+
+  @Override
+  public void shot() {
+    super.shot();
+    System.out.println("Пиу-пиу-пиу!");
+  }
+}
+```
