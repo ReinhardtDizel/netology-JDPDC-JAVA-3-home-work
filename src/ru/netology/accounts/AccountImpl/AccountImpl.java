@@ -1,10 +1,14 @@
 package ru.netology.accounts.AccountImpl;
 
+import ru.netology.accounts.Account;
 import ru.netology.exceptions.EnlargeException.EnlargeException;
 import ru.netology.exceptions.ReduceException.ReduceException;
-import ru.netology.accounts.Account;
+
+import java.util.logging.Logger;
 
 public abstract class AccountImpl implements Account {
+
+    private final static Logger LOGGER = Logger.getLogger(AccountImpl.class.getName());
 
     abstract protected int enlarge(final int amount);
     abstract protected int reduce(final int amount);
@@ -21,6 +25,7 @@ public abstract class AccountImpl implements Account {
             reduce(amount);
             printPayMsg(amount);
         } catch (ReduceException exception) {
+            LOGGER.info(exception.getMessage());
             System.out.println(exception.getMessage());
         }
     }
@@ -34,11 +39,13 @@ public abstract class AccountImpl implements Account {
                 account.enlarge(amount);
                 printSuccessTransferMsg(amount);
             } catch (EnlargeException exception) {
+                LOGGER.info(exception.getMessage());
                 System.out.println(exception.getMessage());
                 enlarge(amount);
                 printFailTransferMsg();
             }
         } catch (ReduceException exception) {
+            LOGGER.info(exception.getMessage());
             System.out.println(exception.getMessage());
         }
     }
@@ -50,6 +57,7 @@ public abstract class AccountImpl implements Account {
             enlarge(amount);
             printAddMoneyMsg(amount);
         } catch (EnlargeException exception) {
+            LOGGER.info(exception.getMessage());
             System.out.println(exception.getMessage());
         }
     }
