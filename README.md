@@ -1,215 +1,70 @@
-## Задача 2. Банковские счета
+## Задача 1. Проверка доступа к ресурсу
 
 ### Описание
-Часто в проектировании программ нам удобно опираться на понятия, которые не представлены в реальном мире,
-но служат удобной "опорой" для объединения нескольких классов.
-
-Так, например, в банковском деле нет абстрактного понятия "Счет". Каждый счет в банке имеет четкое назначение: сберегательный, кредитный, расчетный.
-Но банковская программа работает с общими для счетов операциями как с одинаковыми объектами, и выполняет их, обращаясь к общему типу "Счет",
-хотя его и невозможно явно инстанцировать в программе. Реализуйте этот сценарий, опираясь на механизмы полиморфизма.
+В этом задании мы напишем программу для проверки доступа к ресурсу. Во время запуска программы нужно запросить логин или пароль пользователя. Если один из введеных параметров не совпадает (логин/пароль), то нужно выбросить checked исключение UserNotFoundException. Если возраст пользователя менее 18 лет, то нужно выбросить исключение AccessDeniedException, а если 18 и больше лет - вывести сообщение "Доступ предоставлен". <br>
+<br>
+Массив пользователей для авторизации нужно описать до запуска программы. Каждая запись пользователя содержит поля: login, password, age (возраст) и email.
 
 ### Функционал программы
-1. Были созданы несколько классов — различных счетов на основе общего абстрактного класса `AccountImpl`, реализующего интерфейс `Account`.
-- Интерфейс `Account` Предоставляет возможный функционал абстрактного "Счета"
+1. Создание Scanner для чтения логина и пароля пользователя из консоли;
+2. Создание checked исключения UserNotFoundException;
+3. Создание checked исключения AccessDeniedException;
+4. Выбрасывать ошибку UserNotFoundException, если логин или пароль введены не верно;
+5. Выбрасывать ошибку AccessDeniedException, если возраст пользователя меньше 18 лет;
+5. Если ошибок не возникло, вывести сообщение "Доступ предоставлен".
+
+### Процесс реализации
+1. Создадим класс User, в котором будем хранить инфомрацию о логине, пароле и возрасте пользователя:
+   class User, login, password, email, age;
+2. Создадим класс исключение UserNotFoundException на основе базового класса Exception. Это исключение будем использовать, если пользователь ввел неверный логин или пароль:
 ```java
-public interface Account {
-
-    void pay(int amount);
-
-    void transfer(Enlargeable account, int amount) throws EnlargeException;
-
-    void addMoney(int amount) throws EnlargeException;
-
-    void printBalance();
-
-    int getBalance();
-}
-```
-- Так как все операции связанны либо с увеличением счета, либо с уменьшением, созданы два абстрактных метода: `enlarge` и `reduce`, которые будут реализованы в классах наследниках
-```java
-abstract protected int enlarge(final int amount);
-
-```
-```java
-abstract protected int reduce(final int amount);
-```
-- абстрактный класс `AccountImpl`
-```java
-public abstract class AccountImpl implements Account {
-
-    abstract protected int enlarge(final int amount);
-    abstract protected int reduce(final int amount);
-    
-    @Override
-    public void printBalance() {
-        System.out.printf("Баланс вашего лицевого счета: %d руб.\n", getBalance());
-    }
-
-    @Override
-    public void pay(int amount) {
-
-        try {
-            reduce(amount);
-            printPayMsg(amount);
-        } catch (ReduceException exception) {
-            System.out.println(exception.getMessage());
-        }
-    }
-
-    @Override
-    public void transfer(AccountImpl account, int amount) {
-
-        try {
-            reduce(amount);
-            try {
-                account.enlarge(amount);
-                printSuccessTransferMsg(amount);
-            } catch (EnlargeException exception) {
-                System.out.println(exception.getMessage());
-                enlarge(amount);
-                printFailTransferMsg();
-            }
-        } catch (ReduceException exception) {
-            System.out.println(exception.getMessage());
-        }
-    }
-
-    @Override
-    public void addMoney(int amount) {
-
-        try {
-            enlarge(amount);
-            printAddMoneyMsg(amount);
-        } catch (EnlargeException exception) {
-            System.out.println(exception.getMessage());
-        }
-    }
-
-    private void printPayMsg(final int payment) {
-
-        System.out.printf("Вы совершили покупку на %d руб. Баланс: %d руб.\n", payment, getBalance());
-    }
-
-    private void printSuccessTransferMsg(final int transfer) {
-
-        System.out.printf("Вы перевели %d руб. Баланс: %d\n", transfer, getBalance());
-    }
-
-    private void printFailTransferMsg() {
-
-        System.out.printf("Перевод отменен, деньги возвращены на ваш счет. Баланс: %d руб.\n", getBalance());
-    }
-
-    private void printAddMoneyMsg(final int money) {
-
-        System.out.printf("На ваш счет зачислено %d руб. Баланс: %d руб.\n", money, getBalance());
+public class UserNotFoundException extends Exception {
+    public UserNotFoundException(String message) {
+        super(message);
     }
 }
 ```
-2. В абстрактном классе реализованны основные методы задания `pay(int amount)`, `transfer(Account account, int amount)`, `addMoney(int amount)`. Но логику их выполнения, связанную с изменением баланса, будут контролировать классы наследники, потому что они сами "знают" когда его можно менять, а когда нельзя. Так же для Сберегательного счета переопределен метод `pay` так как с него нельзя платить. 
-- Сберегательный счет (`SavingsAccount`)
+3. Аналогичным образом создадим класс исключения AccessDeniedException
+4. Создадим класс Main, в котором создадим метод getUsers, этот метод должен возвращать список заранее созданных пользователей:
 ```java
-public class SavingsAccount extends AccountImpl {
-
-    private int account;
-
-    public SavingsAccount(int account) {
-        this.account = account;
-    }
-
-    @Override
-    public int getBalance() {
-        return account;
-    }
-
-    @Override
-    public int enlarge(int amount) {
-        return account += amount;
-    }
-
-    @Override
-    public int reduce(int amount) {
-
-        int temp = getBalance();
-        if (temp - amount >= 0) {
-
-            return account -= amount;
-        } else {
-            throw new ReduceException(String.format("Операция отклонена, баланс вашего счета: %d руб.", account));
-        }
-    }
-
-    @Override
-    public void pay(int amount) {
-        System.out.println("Операция отклонена, нельзя совершать покупки со Сберегательного счета!");
-    }
+public static User[] getUsers() {
+    User user1 = new User("jhon", "jhon@gmail.com", "pass", 24);
+    ...
+    return new User[]{user1, ...};
 }
 ```
-- Кредитный счет (`CreditAccount`)
+5. Создадим в классе Main метод getUserByLoginAndPassword(String login, String password), в этом методе нужно найти соответствие пары логина и пароля пользователя из массива, возвращаемого методом getUsers. Если пользователь не найден, выбрасываем исключение UserNotFoundException, если найден - возвращаем найденного пользователя:
 ```java
-public class CreditAccount extends AccountImpl {
-
-    private int account;
-
-    public CreditAccount(int account) {
-        this.account = account;
+public static User getUserByLoginAndPassword(String login, String password) throws UserNotFoundException {
+    User[] users = getUsers();
+    for (User user : users) {
+        ...
     }
-
-    @Override
-    public int getBalance() {
-        return account;
-    }
-
-    @Override
-    public int enlarge(int amount) {
-
-        int temp = getBalance();
-        if (temp + amount <= 0) {
-
-            return account += amount;
-        } else {
-            throw new EnlargeException("Операция отклонена, баланс кредитной карты не может быть больше 0!");
-        }
-    }
-
-    @Override
-    public int reduce(int amount) {
-        return account -= amount;
-    }
-}
+    throw new UserNotFoundException("User not found");    
+}   
 ```
-- Расчетный счет (`CheckingAccount`)
+6. Создадим к классу Main еще один метод validateUser для проверки возрастра пользователя. Если возраст менее 18 лет, метод должен выбросить исключение AccessDeniedException:
 ```java
-public class CheckingAccount extends AccountImpl {
+public static void validateUser(User user) throws AccessDeniedException
+``` 
+7. Добавим последний метод в классе Main для запуска программы public static void main(String[] args) throws UserNotFoundException, AccessDeniedException
+   В нем нужно запросить логин и пароль пользователя, проверить есть ли данная пара "логин и пароль" в массиве пользователей и последним шагом провалидировать возраст.
+```java
+    public static void main(String[] args) throws UserNotFoundException, AccessDeniedException {
 
-    private int account;
+        Scanner scanner = new Scanner(System.in);
 
-    public CheckingAccount(int account) {
-        this.account = account;
+        System.out.println("Введите логин");
+        String login = scanner.nextLine();
+        System.out.println("Введите пароль");
+        String password = scanner.nextLine();
+
+        //Проверить логин и пароль
+        
+        //Вызвать методы валидации пользователя
+        
+        System.out.println("Доступ предоставлен");
     }
 
-    @Override
-    public int getBalance() {
-        return account;
-    }
-
-    @Override
-    public int enlarge(int amount) {
-
-        return account += amount;
-    }
-
-    @Override
-    public int reduce(int amount) {
-
-        int temp = getBalance();
-        if (temp - amount >= 0) {
-
-            return account -= amount;
-        } else {
-            throw new ReduceException(String.format("Операция отклонена, баланс вашего счета: %d руб.", account));
-        }
-    }
-}
 ```
-3. Так как задача усложненная, для удобства контроля возможности совершить операцию по счету, созданы два класса Исключений, которые будут "бросаться" при невозможности выполнения операций уменьшения или увеличения баланса счета. Это особенно удобно для метода `transfer` потому, что в этом методе, нужно выполнить сразу две операции: снять деньги с одного счета и добавить к другому. Если пополняемый счет кредитный и его баланс после пополнения будет больше 0, операция должна быть отклонена, а это реализовать обычным методом очень не красиво.
+8. Программа завершена. Отличная работа!
