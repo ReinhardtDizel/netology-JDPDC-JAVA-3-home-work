@@ -1,70 +1,55 @@
-## Задача 1. Проверка доступа к ресурсу
+## Задача 2. Валидация прочитанных событий
 
 ### Описание
-В этом задании мы напишем программу для проверки доступа к ресурсу. Во время запуска программы нужно запросить логин или пароль пользователя. Если один из введеных параметров не совпадает (логин/пароль), то нужно выбросить checked исключение UserNotFoundException. Если возраст пользователя менее 18 лет, то нужно выбросить исключение AccessDeniedException, а если 18 и больше лет - вывести сообщение "Доступ предоставлен". <br>
+Для выполнения задачи со звездочкой мы напишем программу проверки коррекности прочитанных значений. Для этого подготовим список событий - такими событиями (event) могут быть фильмы/спектакли. <br>
 <br>
-Массив пользователей для авторизации нужно описать до запуска программы. Каждая запись пользователя содержит поля: login, password, age (возраст) и email.
-
+Базовый класс event содержит поля: название (title), год выпуска (releaseYear), ограничение по возрасту (age).<br>
+<br>
+Если любое из полей прочитанного объекта равно null или 0 (для целочисленных полей), нужно выбсроить RuntimeException и завершить работу программы, если ошибок не возникло - вывести сообщение "Все события корректны". <br>
+<br>
 ### Функционал программы
-1. Создание Scanner для чтения логина и пароля пользователя из консоли;
-2. Создание checked исключения UserNotFoundException;
-3. Создание checked исключения AccessDeniedException;
-4. Выбрасывать ошибку UserNotFoundException, если логин или пароль введены не верно;
-5. Выбрасывать ошибку AccessDeniedException, если возраст пользователя меньше 18 лет;
-5. Если ошибок не возникло, вывести сообщение "Доступ предоставлен".
+1. Создание заранее подготовленного списока событий - отдельно для кино и отдельно для театров;
+2. Возможность валидации каждолго из списка событий с помощью универсального метода;
+3. Если хотя бы одно из событий содержит поля со значением null или 0, завершить работу программы и вывести это событие;
+4. Если ошибок не возникло, вывести сообщение "Все события корректны".
 
 ### Процесс реализации
-1. Создадим класс User, в котором будем хранить инфомрацию о логине, пароле и возрасте пользователя:
-   class User, login, password, email, age;
-2. Создадим класс исключение UserNotFoundException на основе базового класса Exception. Это исключение будем использовать, если пользователь ввел неверный логин или пароль:
+1. Создадим класс Event для описания базового события с полями title, releaseYear и age (класс можно сделать абстрактным);
+2. Переопределим метод toString для класса Event, чтобы вывести значения всех полей;
+3. Создадим два дочерних класса от класса Event - Movie и Theatre;
+4. Создадим класс Main в котором нужно создать два метода для получения массива Movies, Theatres:
 ```java
-public class UserNotFoundException extends Exception {
-    public UserNotFoundException(String message) {
-        super(message);
+    public static Movie[] getMovies() {
+        return new Movie[]{
+            new Movie("Начало", 2010, 16),
+            ...
+        };
     }
+
+    public static Theatre[] getTheatres() {
+        return new Theatre[]{
+            new Theatre("Анна Каренина", 2017, 16),
+            ...
+        };
+    }
+```
+5. Добавим в класс Main метод для валидации событий (Event)
+```java
+public static void validEvent(Event event)
+```
+Если хоть одно из полей не заполнено, нужно выбросить исключение throw new RuntimeException, обрабатывать
+или перехватывать эту ошибку нигде не нужно.
+
+6. Добавим в класс Main метод main для запуска и валидации созданных событий:
+```java
+public static void main(String[] args) {
+    for (Event event: getMovies()) {
+        validEvent(event);
+    }
+    for (Event event: getTheatres()) {
+        validEvent(event);
+    }
+    System.out.println("Все события корректны");
 }
 ```
-3. Аналогичным образом создадим класс исключения AccessDeniedException
-4. Создадим класс Main, в котором создадим метод getUsers, этот метод должен возвращать список заранее созданных пользователей:
-```java
-public static User[] getUsers() {
-    User user1 = new User("jhon", "jhon@gmail.com", "pass", 24);
-    ...
-    return new User[]{user1, ...};
-}
-```
-5. Создадим в классе Main метод getUserByLoginAndPassword(String login, String password), в этом методе нужно найти соответствие пары логина и пароля пользователя из массива, возвращаемого методом getUsers. Если пользователь не найден, выбрасываем исключение UserNotFoundException, если найден - возвращаем найденного пользователя:
-```java
-public static User getUserByLoginAndPassword(String login, String password) throws UserNotFoundException {
-    User[] users = getUsers();
-    for (User user : users) {
-        ...
-    }
-    throw new UserNotFoundException("User not found");    
-}   
-```
-6. Создадим к классу Main еще один метод validateUser для проверки возрастра пользователя. Если возраст менее 18 лет, метод должен выбросить исключение AccessDeniedException:
-```java
-public static void validateUser(User user) throws AccessDeniedException
-``` 
-7. Добавим последний метод в классе Main для запуска программы public static void main(String[] args) throws UserNotFoundException, AccessDeniedException
-   В нем нужно запросить логин и пароль пользователя, проверить есть ли данная пара "логин и пароль" в массиве пользователей и последним шагом провалидировать возраст.
-```java
-    public static void main(String[] args) throws UserNotFoundException, AccessDeniedException {
-
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Введите логин");
-        String login = scanner.nextLine();
-        System.out.println("Введите пароль");
-        String password = scanner.nextLine();
-
-        //Проверить логин и пароль
-        
-        //Вызвать методы валидации пользователя
-        
-        System.out.println("Доступ предоставлен");
-    }
-
-```
-8. Программа завершена. Отличная работа!
+7. Завершим работу программы. Прекрасно!
