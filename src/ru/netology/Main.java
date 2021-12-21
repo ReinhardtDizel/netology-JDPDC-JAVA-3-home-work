@@ -1,44 +1,91 @@
 package ru.netology;
 
-import ru.netology.events.Event;
-import ru.netology.events.Movie;
-import ru.netology.events.Theatre;
+import ru.netology.Notebook.Notebook;
+
+import java.util.InputMismatchException;
+import java.util.Scanner;
 
 public class Main {
 
-    public static Movie[] getMovies() {
-        return new Movie[]{
-                new Movie("Начало", 2010, 16),
-                new Movie("Конец", 2020, 18),
-                new Movie("", 2020, 18),
+    private static final Scanner scanner = new Scanner(System.in);
+    private static final Notebook myNotebook = new Notebook();
 
-        };
+    private static int showMenu() {
+
+        int input = -1;
+        System.out.println("Выберите действие:\n1. Добавить задачу\n2. Вывести список задач\n3. Удалить задачу\n0. Выход");
+        try {
+
+            input = scanner.nextInt();
+            if (input > 3 || input < 0) {
+                throw new InputMismatchException();
+            }
+        } catch (InputMismatchException exception) {
+            System.out.println("Введите валидное число");
+        }
+        return input;
+
     }
 
-    public static Theatre[] getTheatres() {
-        return new Theatre[]{
-                new Theatre("Анна Каренина", 2017, 16),
-                new Theatre("Анна Петровна", 2010, 10),
-                new Theatre("Монти Пайтон и Священный Грааль", 1975, -1)
-        };
+    private static void addTask() {
+
+        String task;
+        System.out.println("Введите задачу для планирования:");
+        task = readInput();
+        myNotebook.newTask(task);
     }
 
+    private static void printAll() {
 
-    public static void validEvent(Event event) {
+        System.out.println("Список задач:");
+        System.out.println(myNotebook);
+    }
 
-        if (event.getTitle().isEmpty() || event.getTitle() == null || event.getReleaseYear() == 0 || event.getAge() == 0) {
-            throw new RuntimeException(String.format("В событии должны быть заполнены все поля! %s: %s\n", event.getClass().getSimpleName(), event));
+    private static void deleteTask() {
+
+        String task;
+        int taskNum;
+        printAll();
+        System.out.println("Введите задачу для удаления:");
+        task = readInput();
+        try {
+            taskNum = Integer.parseInt(task);
+            myNotebook.deleteTask(taskNum);
+        } catch (NumberFormatException e) {
+            myNotebook.deleteTask(task);
         }
     }
 
-    public static void main(String[] args) {
+    private static String readInput() {
+        
+        String input = "";
+        while (input.isEmpty()) {
+            input = scanner.nextLine();
+        }
+        return input;
+    }
 
-        for (Event event : getMovies()) {
-            validEvent(event);
+    public static void main(String... args) {
+
+        int input = -1;
+
+        while (input != 0) {
+
+            input = showMenu();
+
+            switch (input) {
+                case 1:
+                    addTask();
+                    break;
+                case 2:
+                    printAll();
+                    break;
+                case 3:
+                    deleteTask();
+                    break;
+            }
+
         }
-        for (Event event : getTheatres()) {
-            validEvent(event);
-        }
-        System.out.println("Все события корректны");
+
     }
 }
