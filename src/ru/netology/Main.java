@@ -1,91 +1,56 @@
 package ru.netology;
 
-import ru.netology.Notebook.Notebook;
-
-import java.util.InputMismatchException;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
 
+    private static final int MAX_FLOR = 25;
+    private static final Queue<Integer> elevator = new ArrayDeque<>(MAX_FLOR);
     private static final Scanner scanner = new Scanner(System.in);
-    private static final Notebook myNotebook = new Notebook();
 
-    private static int showMenu() {
+    private static int totalSeconds = 0;
+    private static int previousFloor = -1;
 
-        int input = -1;
-        System.out.println("Выберите действие:\n1. Добавить задачу\n2. Вывести список задач\n3. Удалить задачу\n0. Выход");
-        try {
+    private static int elevatorProcess() {
 
-            input = scanner.nextInt();
-            if (input > 3 || input < 0) {
-                throw new InputMismatchException();
-            }
-        } catch (InputMismatchException exception) {
-            System.out.println("Введите валидное число");
+        System.out.println("Ожидаю ввода этажа: (для завершения введите 0)");
+        int input = scanner.nextInt();
+        if (input > MAX_FLOR || input < 0) {
+            System.out.println("Такого этажа нет в доме");
         }
         return input;
-
     }
 
-    private static void addTask() {
+    private static void calculateTime(int flor) {
 
-        String task;
-        System.out.println("Введите задачу для планирования:");
-        task = readInput();
-        myNotebook.newTask(task);
-    }
-
-    private static void printAll() {
-
-        System.out.println("Список задач:");
-        System.out.println(myNotebook);
-    }
-
-    private static void deleteTask() {
-
-        String task;
-        int taskNum;
-        printAll();
-        System.out.println("Введите задачу для удаления:");
-        task = readInput();
-        try {
-            taskNum = Integer.parseInt(task);
-            myNotebook.deleteTask(taskNum);
-        } catch (NumberFormatException e) {
-            myNotebook.deleteTask(task);
+        int waitMoveInSeconds = 5;
+        int waitDoorsInSeconds = 10;
+        if (previousFloor != -1) {
+            totalSeconds += Math.abs(flor - previousFloor) * waitMoveInSeconds;
         }
-    }
-
-    private static String readInput() {
-        
-        String input = "";
-        while (input.isEmpty()) {
-            input = scanner.nextLine();
-        }
-        return input;
+        totalSeconds += waitDoorsInSeconds;
+        previousFloor = flor;
     }
 
     public static void main(String... args) {
 
         int input = -1;
-
         while (input != 0) {
-
-            input = showMenu();
-
-            switch (input) {
-                case 1:
-                    addTask();
-                    break;
-                case 2:
-                    printAll();
-                    break;
-                case 3:
-                    deleteTask();
-                    break;
-            }
-
+            input = elevatorProcess();
+            elevator.add(input);
         }
+        System.out.println("Лифт проследовал по следующим этажам:");
 
+        while (!elevator.isEmpty()) {
+            Integer currentFloor = elevator.poll();
+            if (currentFloor != null) {
+                calculateTime(currentFloor);
+                System.out.printf("этаж %d ", currentFloor);
+                if (!elevator.isEmpty()) {
+                    System.out.print("-> ");
+                }
+            }
+        }
+        System.out.println("\nВремя затраченное лифтом на маршрут =: " + totalSeconds + " с.");
     }
 }
