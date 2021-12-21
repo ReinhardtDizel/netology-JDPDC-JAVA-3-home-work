@@ -1,37 +1,91 @@
 package ru.netology;
 
-import ru.netology.accounts.AccountImpl.AccountImpl;
-import ru.netology.accounts.CheckingAccount.CheckingAccount;
-import ru.netology.accounts.CreditAccount.CreditAccount;
-import ru.netology.accounts.SavingsAccount.SavingsAccount;
+import ru.netology.Notebook.Notebook;
+
+import java.util.InputMismatchException;
+import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) {
+    private static final Scanner scanner = new Scanner(System.in);
+    private static final Notebook myNotebook = new Notebook();
 
-        AccountImpl checkingAccount1 = new CheckingAccount(0);
-        AccountImpl creditAccount1 = new CreditAccount(-10_000);
-        AccountImpl savingsAccount1 = new SavingsAccount(10_000);
-        AccountImpl savingsAccount2 = new SavingsAccount(15_000);
+    private static int showMenu() {
 
-        System.out.printf("\nОперации со счетом %s: \n", checkingAccount1.getClass().getSimpleName());
-        checkingAccount1.pay(100);// На хлебушек
-        checkingAccount1.addMoney(1000);
-        checkingAccount1.pay(100);
-        checkingAccount1.transfer(creditAccount1, 900);
+        int input = -1;
+        System.out.println("Выберите действие:\n1. Добавить задачу\n2. Вывести список задач\n3. Удалить задачу\n0. Выход");
+        try {
 
-        System.out.printf("\nОперации со счетом %s: \n", creditAccount1.getClass().getSimpleName());
-        creditAccount1.printBalance();
-        creditAccount1.pay(5000);
-        creditAccount1.addMoney(15000);
-        creditAccount1.addMoney(14000);
+            input = scanner.nextInt();
+            if (input > 3 || input < 0) {
+                throw new InputMismatchException();
+            }
+        } catch (InputMismatchException exception) {
+            System.out.println("Введите валидное число");
+        }
+        return input;
 
-        System.out.printf("\nОперации со счетом %s: \n", savingsAccount1.getClass().getSimpleName());
-        savingsAccount1.pay(200);
-        savingsAccount1.printBalance();
-        savingsAccount1.transfer(creditAccount1, 1000);
-        savingsAccount1.transfer(savingsAccount2, 1000);
-        savingsAccount1.addMoney(10_000);
+    }
+
+    private static void addTask() {
+
+        String task;
+        System.out.println("Введите задачу для планирования:");
+        task = readInput();
+        myNotebook.newTask(task);
+    }
+
+    private static void printAll() {
+
+        System.out.println("Список задач:");
+        System.out.println(myNotebook);
+    }
+
+    private static void deleteTask() {
+
+        String task;
+        int taskNum;
+        printAll();
+        System.out.println("Введите задачу для удаления:");
+        task = readInput();
+        try {
+            taskNum = Integer.parseInt(task);
+            myNotebook.deleteTask(taskNum);
+        } catch (NumberFormatException e) {
+            myNotebook.deleteTask(task);
+        }
+    }
+
+    private static String readInput() {
+        
+        String input = "";
+        while (input.isEmpty()) {
+            input = scanner.nextLine();
+        }
+        return input;
+    }
+
+    public static void main(String... args) {
+
+        int input = -1;
+
+        while (input != 0) {
+
+            input = showMenu();
+
+            switch (input) {
+                case 1:
+                    addTask();
+                    break;
+                case 2:
+                    printAll();
+                    break;
+                case 3:
+                    deleteTask();
+                    break;
+            }
+
+        }
 
     }
 }
